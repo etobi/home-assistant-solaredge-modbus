@@ -60,7 +60,7 @@ class SolaredgeModbusConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             if not host_valid(user_input[CONF_HOST]):
                 errors[CONF_HOST] = "invalid host IP"
             else:
-                await self.async_set_unique_id(user_input[CONF_HOST])
+                await self.async_set_unique_id(user_input[CONF_NAME])
                 self._abort_if_unique_id_configured()
                 return self.async_create_entry(
                     title=user_input[CONF_NAME], data=user_input
