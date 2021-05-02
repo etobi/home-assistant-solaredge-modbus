@@ -37,7 +37,6 @@ DATA_SCHEMA = vol.Schema(
         vol.Optional(CONF_READ_METER1, default=DEFAULT_READ_METER1): bool,
         vol.Optional(CONF_READ_METER2, default=DEFAULT_READ_METER2): bool,
         vol.Optional(CONF_READ_METER3, default=DEFAULT_READ_METER3): bool,
-        vol.Optional(CONF_READ_METER3, default=DEFAULT_READ_METER3): bool,
         vol.Optional(CONF_READ_STORAGE, default=DEFAULT_READ_STORAGE): bool,
         vol.Optional(CONF_SCAN_INTERVAL, default=DEFAULT_SCAN_INTERVAL): int,
     }
