@@ -288,7 +288,7 @@ METER3_SENSOR_TYPES = {
 }
 
 STORAGE_SENSOR_TYPES = {
-    "STORAGE_Power": ["Storage AC Power", "storage_acpower", "W", "mdi:battery-charging-100"],
+    "STORAGE_Power": ["Storage AC Power", "storage_power", "W", "mdi:battery-charging-100"],
     "STORAGE_SOC": ["Storage State of Charge", "storage_soc", "%", "mdi:battery-high"],
 }
 

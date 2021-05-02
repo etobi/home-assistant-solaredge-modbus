@@ -354,7 +354,7 @@ class SolaredgeModbusHub:
         return True
 
     def read_modbus_data_storage_stub(self):
-        self.data["storage_acpower"] = 1
+        self.data["storage_power"] = 1
         self.data["storage_soc"] = 1
 
         return True
