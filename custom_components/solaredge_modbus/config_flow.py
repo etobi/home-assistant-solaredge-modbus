@@ -44,15 +44,6 @@ def host_valid(host):
         disallowed = re.compile(r"[^a-zA-Z\d\-]")
         return all(x and not disallowed.search(x) for x in host.split("."))
 
-
-@callback
-def solaredge_modbus_entries(hass: HomeAssistant):
-    """Return the hosts already configured."""
-    return set(
-        entry.data[CONF_HOST] for entry in hass.config_entries.async_entries(DOMAIN)
-    )
-
-
 class SolaredgeModbusConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     """Solaredge Modbus configflow."""
 
