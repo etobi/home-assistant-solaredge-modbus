@@ -216,7 +216,7 @@ class SolaredgeModbusHub:
             and self.read_modbus_data_meter1_stub()
             and self.read_modbus_data_meter2_stub()
             and self.read_modbus_data_meter3_stub()
-            and self.read
+            and self.read_modbus_data_storage_stub()
         )
 
     def read_modbus_data(self):
@@ -227,7 +227,9 @@ class SolaredgeModbusHub:
             and self.read_modbus_data_meter1()
             and self.read_modbus_data_meter2()
             and self.read_modbus_data_meter3()
+            and self.read_modbus_data_storage()
         )
+        
     def read_modbus_data_inverter1_stub(self):
         return self.read_modbus_data_inverter_stub("i1_")
 
@@ -673,19 +675,19 @@ class SolaredgeModbusHub:
     
 
     def read_modbus_data_inverter1(self):
-        if self.inverter1_unit > 0:
+        if self.inverter1_unit == 0:
             return True
         else:
             return self.read_modbus_data_inverter("i1_", self.inverter1_unit)
 
     def read_modbus_data_inverter2(self):
-        if self.inverter2_unit > 0:
+        if self.inverter2_unit == 0:
             return True
         else:
             return self.read_modbus_data_inverter("i2_", self.inverter2_unit)
 
     def read_modbus_data_inverter3(self):
-        if self.inverter3_unit > 0:
+        if self.inverter3_unit == 0:
             return True
         else:
             return self.read_modbus_data_inverter("i3_", self.inverter3_unit)
@@ -815,6 +817,9 @@ class SolaredgeModbusHub:
         return struct.unpack('>f', f)[0]
 
     def read_modbus_data_storage(self):
+        if not self.read_storage:
+            return True
+
         storage_power_data = self.read_holding_registers(unit=1, address=62836, count=2)
         if storage_power_data.isError():
             return False
@@ -828,5 +833,5 @@ class SolaredgeModbusHub:
 
         storage_soc = self.get_float(storage_soc_data)
         self.data["storage_soc"] = round(storage_soc)
-        
+
         return True
