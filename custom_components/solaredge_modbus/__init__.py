@@ -23,6 +23,8 @@ from .const import (
     CONF_READ_METER1,
     CONF_READ_METER2,
     CONF_READ_METER3,
+    CONF_INVERTER_UNIT,
+    DEFAULT_INVERTER_UNIT,
     DEFAULT_READ_METER1,
     DEFAULT_READ_METER2,
     DEFAULT_READ_METER3,
@@ -35,6 +37,7 @@ SOLAREDGE_MODBUS_SCHEMA = vol.Schema(
         vol.Optional(CONF_NAME, default=DEFAULT_NAME): cv.string,
         vol.Required(CONF_HOST): cv.string,
         vol.Required(CONF_PORT): cv.string,
+        vol.Required(CONF_INVERTER_UNIT, default=DEFAULT_INVERTER_UNIT): cv.positive_int,
         vol.Optional(CONF_READ_METER1, default=DEFAULT_READ_METER1): cv.boolean,
         vol.Optional(CONF_READ_METER2, default=DEFAULT_READ_METER2): cv.boolean,
         vol.Optional(CONF_READ_METER3, default=DEFAULT_READ_METER3): cv.boolean,
@@ -66,11 +69,12 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
     read_meter1 = entry.data.get(CONF_READ_METER1, False)
     read_meter2 = entry.data.get(CONF_READ_METER2, False)
     read_meter3 = entry.data.get(CONF_READ_METER3, False)
+    inverter_unit = entry.data.get(CONF_INVERTER_UNIT, 1)
 
     _LOGGER.debug("Setup %s.%s", DOMAIN, name)
 
     hub = SolaredgeModbusHub(
-        hass, name, host, port, scan_interval, read_meter1, read_meter2, read_meter3
+        hass, name, host, port, scan_interval, read_meter1, read_meter2, read_meter3, inverter_unit
     )
     """Register the hub."""
     hass.data[DOMAIN][name] = {"hub": hub}
@@ -112,6 +116,7 @@ class SolaredgeModbusHub:
         read_meter1=False,
         read_meter2=False,
         read_meter3=False,
+        inverter_unit=1,
     ):
         """Initialize the Modbus hub."""
         self._hass = hass
@@ -121,6 +126,7 @@ class SolaredgeModbusHub:
         self.read_meter1 = read_meter1
         self.read_meter2 = read_meter2
         self.read_meter3 = read_meter3
+        self.inverter_unit = inverter_unit
         self._scan_interval = timedelta(seconds=scan_interval)
         self._unsub_interval_method = None
         self._sensors = []
@@ -629,7 +635,7 @@ class SolaredgeModbusHub:
             return False
 
     def read_modbus_data_inverter(self):
-        inverter_data = self.read_holding_registers(unit=1, address=40071, count=38)
+        inverter_data = self.read_holding_registers(unit=self.inverter_unit, address=40071, count=38)
         if not inverter_data.isError():
             decoder = BinaryPayloadDecoder.fromRegisters(
                 inverter_data.registers, byteorder=Endian.Big
