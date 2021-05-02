@@ -8,35 +8,90 @@ DEFAULT_READ_METER3 = False
 CONF_SOLAREDGE_HUB = "solaredge_hub"
 ATTR_STATUS_DESCRIPTION = "status_description"
 ATTR_MANUFACTURER = "Solaredge"
-CONF_INVERTER_UNIT = "inverter_unit"
+CONF_INVERTER1_UNIT = "inverter1_unit"
+CONF_INVERTER2_UNIT = "inverter2_unit"
+CONF_INVERTER3_UNIT = "inverter3_unit"
 DEFAULT_INVERTER_UNIT = 1
+DEFAULT_DEACTIVATED_INVERTER_UNIT = 0
 CONF_READ_METER1 = "read_meter_1"
 CONF_READ_METER2 = "read_meter_2"
 CONF_READ_METER3 = "read_meter_3"
+CONF_READ_STORAGE = "read_storage"
+DEFAULT_READ_STORAGE = False
 
-SENSOR_TYPES = {
-    "AC_Current": ["AC Current", "accurrent", "A", "mdi:current-ac"],
-    "AC_CurrentA": ["AC Current A", "accurrenta", "A", "mdi:current-ac"],
-    "AC_CurrentB": ["AC Current B", "accurrentb", "A", "mdi:current-ac"],
-    "AC_CurrentC": ["AC Current C", "accurrentc", "A", "mdi:current-ac"],
-    "AC_VoltageAB": ["AC Voltage AB", "acvoltageab", "V", None],
-    "AC_VoltageBC": ["AC Voltage BC", "acvoltagebc", "V", None],
-    "AC_VoltageCA": ["AC Voltage CA", "acvoltageca", "V", None],
-    "AC_VoltageAN": ["AC Voltage AN", "acvoltagean", "V", None],
-    "AC_VoltageBN": ["AC Voltage BN", "acvoltagebn", "V", None],
-    "AC_VoltageCN": ["AC Voltage CN", "acvoltagecn", "V", None],
-    "AC_Power": ["AC Power", "acpower", "W", "mdi:solar-power"],
-    "AC_Frequency": ["AC Frequency", "acfreq", "Hz", None],
-    "AC_VA": ["AC VA", "acva", "VA", None],
-    "AC_VAR": ["AC VAR", "acvar", "VAR", None],
-    "AC_PF": ["AC PF", "acpf", "%", None],
-    "AC_Energy_KWH": ["AC Energy KWH", "acenergy", "kWh", "mdi:solar-power"],
-    "DC_Current": ["DC Current", "dccurrent", "A", "mdi:current-dc"],
-    "DC_Voltage": ["DC Voltage", "dcvoltage", "V", None],
-    "DC_Power": ["DC Power", "dcpower", "W", "mdi:solar-power"],
-    "Temp_Sink": ["Temp Sink", "tempsink", "°C", None],
-    "Status": ["Status", "status", None, None],
-    "Status_Vendor": ["Status Vendor", "statusvendor", None, None],
+INVERTER1_SENSOR_TYPES = {
+    "I1_AC_Current": ["I1 AC Current", "i1_accurrent", "A", "mdi:current-ac"],
+    "I1_AC_CurrentA": ["I1 AC Current A", "i1_accurrenta", "A", "mdi:current-ac"],
+    "I1_AC_CurrentB": ["I1 AC Current B", "i1_accurrentb", "A", "mdi:current-ac"],
+    "I1_AC_CurrentC": ["I1 AC Current C", "i1_accurrentc", "A", "mdi:current-ac"],
+    "I1_AC_VoltageAB": ["I1 AC Voltage AB", "i1_acvoltageab", "V", None],
+    "I1_AC_VoltageBC": ["I1 AC Voltage BC", "i1_acvoltagebc", "V", None],
+    "I1_AC_VoltageCA": ["I1 AC Voltage CA", "i1_acvoltageca", "V", None],
+    "I1_AC_VoltageAN": ["I1 AC Voltage AN", "i1_acvoltagean", "V", None],
+    "I1_AC_VoltageBN": ["I1 AC Voltage BN", "i1_acvoltagebn", "V", None],
+    "I1_AC_VoltageCN": ["I1 AC Voltage CN", "i1_acvoltagecn", "V", None],
+    "I1_AC_Power": ["I1 AC Power", "i1_acpower", "W", "mdi:solar-power"],
+    "I1_AC_Frequency": ["I1 AC Frequency", "i1_acfreq", "Hz", None],
+    "I1_AC_VA": ["I1 AC VA", "i1_acva", "VA", None],
+    "I1_AC_VAR": ["I1 AC VAR", "i1_acvar", "VAR", None],
+    "I1_AC_PF": ["I1 AC PF", "i1_acpf", "%", None],
+    "I1_AC_Energy_KWH": ["I1 AC Energy KWH", "i1_acenergy", "kWh", "mdi:solar-power"],
+    "I1_DC_Current": ["I1 DC Current", "i1_dccurrent", "A", "mdi:current-dc"],
+    "I1_DC_Voltage": ["I1 DC Voltage", "i1_dcvoltage", "V", None],
+    "I1_DC_Power": ["I1 DC Power", "i1_dcpower", "W", "mdi:solar-power"],
+    "I1_Temp_Sink": ["I1 Temp Sink", "i1_tempsink", "°C", None],
+    "I1_Status": ["I1 Status", "i1_status", None, None],
+    "I1_Status_Vendor": ["I1 Status Vendor", "i1_statusvendor", None, None],
+}
+
+INVERTER2_SENSOR_TYPES = {
+    "I2_AC_Current": ["I2 AC Current", "i2_accurrent", "A", "mdi:current-ac"],
+    "I2_AC_CurrentA": ["I2 AC Current A", "i2_accurrenta", "A", "mdi:current-ac"],
+    "I2_AC_CurrentB": ["I2 AC Current B", "i2_accurrentb", "A", "mdi:current-ac"],
+    "I2_AC_CurrentC": ["I2 AC Current C", "i2_accurrentc", "A", "mdi:current-ac"],
+    "I2_AC_VoltageAB": ["I2 AC Voltage AB", "i2_acvoltageab", "V", None],
+    "I2_AC_VoltageBC": ["I2 AC Voltage BC", "i2_acvoltagebc", "V", None],
+    "I2_AC_VoltageCA": ["I2 AC Voltage CA", "i2_acvoltageca", "V", None],
+    "I2_AC_VoltageAN": ["I2 AC Voltage AN", "i2_acvoltagean", "V", None],
+    "I2_AC_VoltageBN": ["I2 AC Voltage BN", "i2_acvoltagebn", "V", None],
+    "I2_AC_VoltageCN": ["I2 AC Voltage CN", "i2_acvoltagecn", "V", None],
+    "I2_AC_Power": ["I2 AC Power", "i2_acpower", "W", "mdi:solar-power"],
+    "I2_AC_Frequency": ["I2 AC Frequency", "i2_acfreq", "Hz", None],
+    "I2_AC_VA": ["I2 AC VA", "i2_acva", "VA", None],
+    "I2_AC_VAR": ["I2 AC VAR", "i2_acvar", "VAR", None],
+    "I2_AC_PF": ["I2 AC PF", "i2_acpf", "%", None],
+    "I2_AC_Energy_KWH": ["I2 AC Energy KWH", "i2_acenergy", "kWh", "mdi:solar-power"],
+    "I2_DC_Current": ["I2 DC Current", "i2_dccurrent", "A", "mdi:current-dc"],
+    "I2_DC_Voltage": ["I2 DC Voltage", "i2_dcvoltage", "V", None],
+    "I2_DC_Power": ["I2 DC Power", "i2_dcpower", "W", "mdi:solar-power"],
+    "I2_Temp_Sink": ["I2 Temp Sink", "i2_tempsink", "°C", None],
+    "I2_Status": ["I2 Status", "i2_status", None, None],
+    "I2_Status_Vendor": ["I2 Status Vendor", "i2_statusvendor", None, None],
+}
+
+INVERTER3_SENSOR_TYPES = {
+    "I3_AC_Current": ["I3 AC Current", "i3_accurrent", "A", "mdi:current-ac"],
+    "I3_AC_CurrentA": ["I3 AC Current A", "i3_accurrenta", "A", "mdi:current-ac"],
+    "I3_AC_CurrentB": ["I3 AC Current B", "i3_accurrentb", "A", "mdi:current-ac"],
+    "I3_AC_CurrentC": ["I3 AC Current C", "i3_accurrentc", "A", "mdi:current-ac"],
+    "I3_AC_VoltageAB": ["I3 AC Voltage AB", "i3_acvoltageab", "V", None],
+    "I3_AC_VoltageBC": ["I3 AC Voltage BC", "i3_acvoltagebc", "V", None],
+    "I3_AC_VoltageCA": ["I3 AC Voltage CA", "i3_acvoltageca", "V", None],
+    "I3_AC_VoltageAN": ["I3 AC Voltage AN", "i3_acvoltagean", "V", None],
+    "I3_AC_VoltageBN": ["I3 AC Voltage BN", "i3_acvoltagebn", "V", None],
+    "I3_AC_VoltageCN": ["I3 AC Voltage CN", "i3_acvoltagecn", "V", None],
+    "I3_AC_Power": ["I3 AC Power", "i3_acpower", "W", "mdi:solar-power"],
+    "I3_AC_Frequency": ["I3 AC Frequency", "i3_acfreq", "Hz", None],
+    "I3_AC_VA": ["I3 AC VA", "i3_acva", "VA", None],
+    "I3_AC_VAR": ["I3 AC VAR", "i3_acvar", "VAR", None],
+    "I3_AC_PF": ["I3 AC PF", "i3_acpf", "%", None],
+    "I3_AC_Energy_KWH": ["I3 AC Energy KWH", "i3_acenergy", "kWh", "mdi:solar-power"],
+    "I3_DC_Current": ["I3 DC Current", "i3_dccurrent", "A", "mdi:current-dc"],
+    "I3_DC_Voltage": ["I3 DC Voltage", "i3_dcvoltage", "V", None],
+    "I3_DC_Power": ["I3 DC Power", "i3_dcpower", "W", "mdi:solar-power"],
+    "I3_Temp_Sink": ["I3 Temp Sink", "i3_tempsink", "°C", None],
+    "I3_Status": ["I3 Status", "i3_status", None, None],
+    "I3_Status_Vendor": ["I3 Status Vendor", "i3_statusvendor", None, None],
 }
 
 
@@ -230,6 +285,11 @@ METER3_SENSOR_TYPES = {
     "M3_IMPORT_VARH_Q4_A": ["M3 IMPORT VARH Q4 A", "m3_importvarhq4a", "VARh", None],
     "M3_IMPORT_VARH_Q4_B": ["M3 IMPORT VARH Q4 B", "m3_importvarhq4b", "VARh", None],
     "M3_IMPORT_VARH_Q4_C": ["M3 IMPORT VARH Q4 C", "m3_importvarhq4c", "VARh", None],
+}
+
+STORAGE_SENSOR_TYPES = {
+    "STORAGE_Power": ["Storage AC Power", "storage_acpower", "W", "mdi:battery-charging-100"],
+    "STORAGE_SOC": ["Storage State of Charge", "storage_soc", "%", "mdi:battery-high"],
 }
 
 DEVICE_STATUSSES = {

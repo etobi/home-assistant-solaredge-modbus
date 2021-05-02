@@ -1,7 +1,9 @@
 import logging
 from typing import Optional, Dict, Any
 from .const import (
-    SENSOR_TYPES,
+    INVERTER1_SENSOR_TYPES,
+    INVERTER2_SENSOR_TYPES,
+    INVERTER3_SENSOR_TYPES,
     METER1_SENSOR_TYPES,
     METER2_SENSOR_TYPES,
     METER3_SENSOR_TYPES,
@@ -9,6 +11,7 @@ from .const import (
     ATTR_STATUS_DESCRIPTION,
     DEVICE_STATUSSES,
     ATTR_MANUFACTURER,
+    STORAGE_SENSOR_TYPES,
 )
 from homeassistant.helpers.entity import Entity
 from homeassistant.const import CONF_NAME
@@ -28,17 +31,45 @@ async def async_setup_entry(hass, entry, async_add_entities):
     }
 
     entities = []
-    for sensor_info in SENSOR_TYPES.values():
-        sensor = SolarEdgeSensor(
-            hub_name,
-            hub,
-            device_info,
-            sensor_info[0],
-            sensor_info[1],
-            sensor_info[2],
-            sensor_info[3],
-        )
-        entities.append(sensor)
+
+    if hub.inverter1_unit > 0:
+        for sensor_info in INVERTER1_SENSOR_TYPES.values():
+            sensor = SolarEdgeSensor(
+                hub_name,
+                hub,
+                device_info,
+                sensor_info[0],
+                sensor_info[1],
+                sensor_info[2],
+                sensor_info[3],
+            )
+            entities.append(sensor)
+
+    if hub.inverter2_unit > 0:
+        for sensor_info in INVERTER2_SENSOR_TYPES.values():
+            sensor = SolarEdgeSensor(
+                hub_name,
+                hub,
+                device_info,
+                sensor_info[0],
+                sensor_info[1],
+                sensor_info[2],
+                sensor_info[3],
+            )
+            entities.append(sensor)
+
+    if hub.inverter3_unit > 0:
+        for sensor_info in INVERTER3_SENSOR_TYPES.values():
+            sensor = SolarEdgeSensor(
+                hub_name,
+                hub,
+                device_info,
+                sensor_info[0],
+                sensor_info[1],
+                sensor_info[2],
+                sensor_info[3],
+            )
+            entities.append(sensor)
 
     if hub.read_meter1 == True:
         for meter_sensor_info in METER1_SENSOR_TYPES.values():
@@ -76,6 +107,19 @@ async def async_setup_entry(hass, entry, async_add_entities):
                 meter_sensor_info[1],
                 meter_sensor_info[2],
                 meter_sensor_info[3],
+            )
+            entities.append(sensor)
+
+    if hub.read_storage == True:
+        for sensor_info in STORAGE_SENSOR_TYPES.values():
+            sensor = SolarEdgeSensor(
+                hub_name,
+                hub,
+                device_info,
+                sensor_info[0],
+                sensor_info[1],
+                sensor_info[2],
+                sensor_info[3],
             )
             entities.append(sensor)
 

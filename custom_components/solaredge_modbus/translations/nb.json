@@ -11,7 +11,10 @@
           "read_meter_1": "Les måler 1-data (bare for målermodeller)",
           "read_meter_2": "Les måler 2-data (bare for målermodeller)",
           "read_meter_3": "Les måler 3-data (bare for målermodeller)",
-          "inverter_unit": "Unit number of the inverter (for reading slaves)",
+          "inverter1_unit": "Unit number of the main inverter",
+          "inverter2_unit": "Unit number of the first slave inverter (0 = deactivate)",
+          "inverter3_unit": "Unit number of the second slave inverter (0 = deactivate)",
+          "read_storage": "Read storage data (battery connected to main inverter)",
           "scan_interval": "Avstemningsfrekvensen til modbus registreres på få sekunder"
         }
       }

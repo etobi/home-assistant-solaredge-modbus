@@ -11,7 +11,10 @@
           "read_meter_1": "Read meter 1 data (only for meter models)",
           "read_meter_2": "Read meter 2 data (only for meter models)",
           "read_meter_3": "Read meter 3 data (only for meter models)",
-          "inverter_unit": "Unit number of the inverter (for reading slaves)",
+          "inverter1_unit": "Unit number of the main inverter",
+          "inverter2_unit": "Unit number of the first slave inverter (0 = deactivate)",
+          "inverter3_unit": "Unit number of the second slave inverter (0 = deactivate)",
+          "read_storage": "Read storage data (battery connected to main inverter)",
           "scan_interval": "The polling frequentie of the modbus registers in seconds"
         }
       }

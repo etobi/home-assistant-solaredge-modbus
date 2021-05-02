@@ -4,6 +4,7 @@ import logging
 import threading
 from datetime import timedelta
 from typing import Optional
+import struct
 
 import voluptuous as vol
 from pymodbus.client.sync import ModbusTcpClient
@@ -23,11 +24,16 @@ from .const import (
     CONF_READ_METER1,
     CONF_READ_METER2,
     CONF_READ_METER3,
-    CONF_INVERTER_UNIT,
+    CONF_INVERTER1_UNIT,
+    CONF_INVERTER2_UNIT,
+    CONF_INVERTER3_UNIT,
     DEFAULT_INVERTER_UNIT,
+    DEFAULT_DEACTIVATED_INVERTER_UNIT,
     DEFAULT_READ_METER1,
     DEFAULT_READ_METER2,
     DEFAULT_READ_METER3,
+    CONF_READ_STORAGE,
+    DEFAULT_READ_STORAGE
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -37,10 +43,13 @@ SOLAREDGE_MODBUS_SCHEMA = vol.Schema(
         vol.Optional(CONF_NAME, default=DEFAULT_NAME): cv.string,
         vol.Required(CONF_HOST): cv.string,
         vol.Required(CONF_PORT): cv.string,
-        vol.Required(CONF_INVERTER_UNIT, default=DEFAULT_INVERTER_UNIT): cv.positive_int,
+        vol.Required(CONF_INVERTER1_UNIT, default=DEFAULT_INVERTER_UNIT): cv.positive_int,
+        vol.Required(CONF_INVERTER2_UNIT, default=DEFAULT_DEACTIVATED_INVERTER_UNIT): cv.positive_int,
+        vol.Required(CONF_INVERTER3_UNIT, default=DEFAULT_DEACTIVATED_INVERTER_UNIT): cv.positive_int,
         vol.Optional(CONF_READ_METER1, default=DEFAULT_READ_METER1): cv.boolean,
         vol.Optional(CONF_READ_METER2, default=DEFAULT_READ_METER2): cv.boolean,
         vol.Optional(CONF_READ_METER3, default=DEFAULT_READ_METER3): cv.boolean,
+        vol.Optional(CONF_READ_STORAGE, default=DEFAULT_READ_STORAGE): cv.boolean,
         vol.Optional(
             CONF_SCAN_INTERVAL, default=DEFAULT_SCAN_INTERVAL
         ): cv.positive_int,
@@ -69,12 +78,15 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
     read_meter1 = entry.data.get(CONF_READ_METER1, False)
     read_meter2 = entry.data.get(CONF_READ_METER2, False)
     read_meter3 = entry.data.get(CONF_READ_METER3, False)
-    inverter_unit = entry.data.get(CONF_INVERTER_UNIT, 1)
+    inverter1_unit = entry.data.get(CONF_INVERTER1_UNIT, 1)
+    inverter2_unit = entry.data.get(CONF_INVERTER2_UNIT, 0)
+    inverter3_unit = entry.data.get(CONF_INVERTER3_UNIT, 0)
+    read_storage = entry.data.get(CONF_READ_STORAGE, False)
 
     _LOGGER.debug("Setup %s.%s", DOMAIN, name)
 
     hub = SolaredgeModbusHub(
-        hass, name, host, port, scan_interval, read_meter1, read_meter2, read_meter3, inverter_unit
+        hass, name, host, port, scan_interval, read_meter1, read_meter2, read_meter3, inverter1_unit, inverter2_unit, inverter3_unit, read_storage
     )
     """Register the hub."""
     hass.data[DOMAIN][name] = {"hub": hub}
@@ -116,7 +128,10 @@ class SolaredgeModbusHub:
         read_meter1=False,
         read_meter2=False,
         read_meter3=False,
-        inverter_unit=1,
+        inverter1_unit=1,
+        inverter2_unit=0,
+        inverter3_unit=0,
+        read_storage=False
     ):
         """Initialize the Modbus hub."""
         self._hass = hass
@@ -126,7 +141,10 @@ class SolaredgeModbusHub:
         self.read_meter1 = read_meter1
         self.read_meter2 = read_meter2
         self.read_meter3 = read_meter3
-        self.inverter_unit = inverter_unit
+        self.inverter1_unit = inverter1_unit
+        self.inverter2_unit = inverter2_unit
+        self.inverter3_unit = inverter3_unit
+        self.read_storage = read_storage
         self._scan_interval = timedelta(seconds=scan_interval)
         self._unsub_interval_method = None
         self._sensors = []
@@ -192,43 +210,56 @@ class SolaredgeModbusHub:
 
     def read_modbus_data_stub(self):
         return (
-            self.read_modbus_data_inverter_stub()
+            self.read_modbus_data_inverter1_stub()
+            and self.read_modbus_data_inverter2_stub()
+            and self.read_modbus_data_inverter3_stub()
             and self.read_modbus_data_meter1_stub()
             and self.read_modbus_data_meter2_stub()
             and self.read_modbus_data_meter3_stub()
+            and self.read
         )
 
     def read_modbus_data(self):
         return (
-            self.read_modbus_data_inverter()
+            self.read_modbus_data_inverter1()
+            and self.read_modbus_data_inverter2()
+            and self.read_modbus_data_inverter3()
             and self.read_modbus_data_meter1()
             and self.read_modbus_data_meter2()
             and self.read_modbus_data_meter3()
         )
+    def read_modbus_data_inverter1_stub(self):
+        return self.read_modbus_data_inverter_stub("i1_")
 
-    def read_modbus_data_inverter_stub(self):
-        self.data["accurrent"] = 1
-        self.data["accurrenta"] = 1
-        self.data["accurrentb"] = 1
-        self.data["accurrentc"] = 1
-        self.data["acvoltageab"] = 1
-        self.data["acvoltagebc"] = 1
-        self.data["acvoltageca"] = 1
-        self.data["acvoltagean"] = 1
-        self.data["acvoltagebn"] = 1
-        self.data["acvoltagecn"] = 1
-        self.data["acpower"] = 1
-        self.data["acfreq"] = 1
-        self.data["acva"] = 1
-        self.data["acvar"] = 1
-        self.data["acpf"] = 1
-        self.data["acenergy"] = 1
-        self.data["dccurrent"] = 1
-        self.data["dcvoltage"] = 1
-        self.data["dcpower"] = 1
-        self.data["tempsink"] = 1
-        self.data["status"] = 1
-        self.data["statusvendor"] = 1
+    def read_modbus_data_inverter2_stub(self):
+        return self.read_modbus_data_inverter_stub("i2_")
+
+    def read_modbus_data_inverter3_stub(self):
+        return self.read_modbus_data_inverter_stub("i3_")
+
+    def read_modbus_data_inverter_stub(self, inverter_prefix):
+        self.data[inverter_prefix + "accurrent"] = 1
+        self.data[inverter_prefix + "accurrenta"] = 1
+        self.data[inverter_prefix + "accurrentb"] = 1
+        self.data[inverter_prefix + "accurrentc"] = 1
+        self.data[inverter_prefix + "acvoltageab"] = 1
+        self.data[inverter_prefix + "acvoltagebc"] = 1
+        self.data[inverter_prefix + "acvoltageca"] = 1
+        self.data[inverter_prefix + "acvoltagean"] = 1
+        self.data[inverter_prefix + "acvoltagebn"] = 1
+        self.data[inverter_prefix + "acvoltagecn"] = 1
+        self.data[inverter_prefix + "acpower"] = 1
+        self.data[inverter_prefix + "acfreq"] = 1
+        self.data[inverter_prefix + "acva"] = 1
+        self.data[inverter_prefix + "acvar"] = 1
+        self.data[inverter_prefix + "acpf"] = 1
+        self.data[inverter_prefix + "acenergy"] = 1
+        self.data[inverter_prefix + "dccurrent"] = 1
+        self.data[inverter_prefix + "dcvoltage"] = 1
+        self.data[inverter_prefix + "dcpower"] = 1
+        self.data[inverter_prefix + "tempsink"] = 1
+        self.data[inverter_prefix + "status"] = 1
+        self.data[inverter_prefix + "statusvendor"] = 1
 
         return True
 
@@ -317,6 +348,12 @@ class SolaredgeModbusHub:
         self.data[meter_prefix + "importvarhq4a"] = 2
         self.data[meter_prefix + "importvarhq4b"] = 2
         self.data[meter_prefix + "importvarhq4c"] = 2
+
+        return True
+
+    def read_modbus_data_storage_stub(self):
+        self.data["storage_acpower"] = 1
+        self.data["storage_soc"] = 1
 
         return True
 
@@ -633,9 +670,28 @@ class SolaredgeModbusHub:
             return True
         else:
             return False
+    
 
-    def read_modbus_data_inverter(self):
-        inverter_data = self.read_holding_registers(unit=self.inverter_unit, address=40071, count=38)
+    def read_modbus_data_inverter1(self):
+        if self.inverter1_unit > 0:
+            return True
+        else:
+            return self.read_modbus_data_inverter("i1_", self.inverter1_unit)
+
+    def read_modbus_data_inverter2(self):
+        if self.inverter2_unit > 0:
+            return True
+        else:
+            return self.read_modbus_data_inverter("i2_", self.inverter2_unit)
+
+    def read_modbus_data_inverter3(self):
+        if self.inverter3_unit > 0:
+            return True
+        else:
+            return self.read_modbus_data_inverter("i3_", self.inverter3_unit)
+
+    def read_modbus_data_inverter(self, inverter_prefix, inverter_unit):
+        inverter_data = self.read_holding_registers(unit=inverter_unit, address=40071, count=38)
         if not inverter_data.isError():
             decoder = BinaryPayloadDecoder.fromRegisters(
                 inverter_data.registers, byteorder=Endian.Big
@@ -651,10 +707,10 @@ class SolaredgeModbusHub:
             accurrentb = self.calculate_value(accurrentb, accurrentsf)
             accurrentc = self.calculate_value(accurrentc, accurrentsf)
 
-            self.data["accurrent"] = round(accurrent, abs(accurrentsf))
-            self.data["accurrenta"] = round(accurrenta, abs(accurrentsf))
-            self.data["accurrentb"] = round(accurrentb, abs(accurrentsf))
-            self.data["accurrentc"] = round(accurrentc, abs(accurrentsf))
+            self.data[inverter_prefix + "accurrent"] = round(accurrent, abs(accurrentsf))
+            self.data[inverter_prefix + "accurrenta"] = round(accurrenta, abs(accurrentsf))
+            self.data[inverter_prefix + "accurrentb"] = round(accurrentb, abs(accurrentsf))
+            self.data[inverter_prefix + "accurrentc"] = round(accurrentc, abs(accurrentsf))
 
             acvoltageab = decoder.decode_16bit_uint()
             acvoltagebc = decoder.decode_16bit_uint()
@@ -671,66 +727,66 @@ class SolaredgeModbusHub:
             acvoltagebn = self.calculate_value(acvoltagebn, acvoltagesf)
             acvoltagecn = self.calculate_value(acvoltagecn, acvoltagesf)
 
-            self.data["acvoltageab"] = round(acvoltageab, abs(acvoltagesf))
-            self.data["acvoltagebc"] = round(acvoltagebc, abs(acvoltagesf))
-            self.data["acvoltageca"] = round(acvoltageca, abs(acvoltagesf))
-            self.data["acvoltagean"] = round(acvoltagean, abs(acvoltagesf))
-            self.data["acvoltagebn"] = round(acvoltagebn, abs(acvoltagesf))
-            self.data["acvoltagecn"] = round(acvoltagecn, abs(acvoltagesf))
+            self.data[inverter_prefix + "acvoltageab"] = round(acvoltageab, abs(acvoltagesf))
+            self.data[inverter_prefix + "acvoltagebc"] = round(acvoltagebc, abs(acvoltagesf))
+            self.data[inverter_prefix + "acvoltageca"] = round(acvoltageca, abs(acvoltagesf))
+            self.data[inverter_prefix + "acvoltagean"] = round(acvoltagean, abs(acvoltagesf))
+            self.data[inverter_prefix + "acvoltagebn"] = round(acvoltagebn, abs(acvoltagesf))
+            self.data[inverter_prefix + "acvoltagecn"] = round(acvoltagecn, abs(acvoltagesf))
 
             acpower = decoder.decode_16bit_int()
             acpowersf = decoder.decode_16bit_int()
             acpower = self.calculate_value(acpower, acpowersf)
 
-            self.data["acpower"] = round(acpower, abs(acpowersf))
+            self.data[inverter_prefix + "acpower"] = round(acpower, abs(acpowersf))
 
             acfreq = decoder.decode_16bit_uint()
             acfreqsf = decoder.decode_16bit_int()
             acfreq = self.calculate_value(acfreq, acfreqsf)
 
-            self.data["acfreq"] = round(acfreq, abs(acfreqsf))
+            self.data[inverter_prefix + "acfreq"] = round(acfreq, abs(acfreqsf))
 
             acva = decoder.decode_16bit_int()
             acvasf = decoder.decode_16bit_int()
             acva = self.calculate_value(acva, acvasf)
 
-            self.data["acva"] = round(acva, abs(acvasf))
+            self.data[inverter_prefix + "acva"] = round(acva, abs(acvasf))
 
             acvar = decoder.decode_16bit_int()
             acvarsf = decoder.decode_16bit_int()
             acvar = self.calculate_value(acvar, acvarsf)
 
-            self.data["acvar"] = round(acvar, abs(acvarsf))
+            self.data[inverter_prefix + "acvar"] = round(acvar, abs(acvarsf))
 
             acpf = decoder.decode_16bit_int()
             acpfsf = decoder.decode_16bit_int()
             acpf = self.calculate_value(acpf, acpfsf)
 
-            self.data["acpf"] = round(acpf, abs(acpfsf))
+            self.data[inverter_prefix + "acpf"] = round(acpf, abs(acpfsf))
 
             acenergy = decoder.decode_32bit_uint()
             acenergysf = decoder.decode_16bit_uint()
             acenergy = self.calculate_value(acenergy, acenergysf)
 
-            self.data["acenergy"] = round(acenergy * 0.001, 3)
+            self.data[inverter_prefix + "acenergy"] = round(acenergy * 0.001, 3)
 
             dccurrent = decoder.decode_16bit_uint()
             dccurrentsf = decoder.decode_16bit_int()
             dccurrent = self.calculate_value(dccurrent, dccurrentsf)
 
-            self.data["dccurrent"] = round(dccurrent, abs(dccurrentsf))
+            self.data[inverter_prefix + "dccurrent"] = round(dccurrent, abs(dccurrentsf))
 
             dcvoltage = decoder.decode_16bit_uint()
             dcvoltagesf = decoder.decode_16bit_int()
             dcvoltage = self.calculate_value(dcvoltage, dcvoltagesf)
 
-            self.data["dcvoltage"] = round(dcvoltage, abs(dcvoltagesf))
+            self.data[inverter_prefix + "dcvoltage"] = round(dcvoltage, abs(dcvoltagesf))
 
             dcpower = decoder.decode_16bit_int()
             dcpowersf = decoder.decode_16bit_int()
             dcpower = self.calculate_value(dcpower, dcpowersf)
 
-            self.data["dcpower"] = round(dcpower, abs(dcpowersf))
+            self.data[inverter_prefix + "dcpower"] = round(dcpower, abs(dcpowersf))
 
             # skip register
             decoder.skip_bytes(2)
@@ -743,13 +799,34 @@ class SolaredgeModbusHub:
             tempsf = decoder.decode_16bit_int()
             tempsink = self.calculate_value(tempsink, tempsf)
 
-            self.data["tempsink"] = round(tempsink, abs(tempsf))
+            self.data[inverter_prefix + "tempsink"] = round(tempsink, abs(tempsf))
 
             status = decoder.decode_16bit_int()
-            self.data["status"] = status
+            self.data[inverter_prefix + "status"] = status
             statusvendor = decoder.decode_16bit_int()
-            self.data["statusvendor"] = statusvendor
+            self.data[inverter_prefix + "statusvendor"] = statusvendor
 
             return True
         else:
             return False
+
+    def get_float(self, data):
+        f = struct.pack('>HH', data.getRegister(1), data.getRegister(0))
+        return struct.unpack('>f', f)[0]
+
+    def read_modbus_data_storage(self):
+        storage_power_data = self.read_holding_registers(unit=1, address=62836, count=2)
+        if storage_power_data.isError():
+            return False
+
+        storage_power = self.get_float(storage_power_data)
+        self.data["storage_power"] = round(storage_power)
+
+        storage_soc_data = self.read_holding_registers(unit=1, address=62852, count=2)
+        if storage_soc_data.isError():
+            return False
+
+        storage_soc = self.get_float(storage_soc_data)
+        self.data["storage_soc"] = round(storage_soc)
+        
+        return True
