@@ -11,6 +11,7 @@
           "read_meter_1": "Read meter 1 data (only for meter models)",
           "read_meter_2": "Read meter 2 data (only for meter models)",
           "read_meter_3": "Read meter 3 data (only for meter models)",
+          "inverter_unit": "Unit number of the inverter (for reading slaves)",
           "scan_interval": "The polling frequentie of the modbus registers in seconds"
         }
       }
