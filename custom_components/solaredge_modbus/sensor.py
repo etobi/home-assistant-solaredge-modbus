@@ -183,7 +183,7 @@ class SolarEdgeSensor(Entity):
 
     @property
     def state_attributes(self) -> Optional[Dict[str, Any]]:
-        if self._key in ["status", "statusvendor"]:
+        if self._key in ["i1_status", "i2_status", "i3_status", "i1_statusvendor", "i2_statusvendor", "i3_statusvendor"]:
             if self.state in DEVICE_STATUSSES:
                 return {ATTR_STATUS_DESCRIPTION: DEVICE_STATUSSES[self.state]}
         return None
