@@ -186,6 +186,9 @@ class SolarEdgeSensor(Entity):
         if self._key in ["i1_status", "i2_status", "i3_status", "i1_statusvendor", "i2_statusvendor", "i3_statusvendor"]:
             if self.state in DEVICE_STATUSSES:
                 return {ATTR_STATUS_DESCRIPTION: DEVICE_STATUSSES[self.state]}
+        if self._key in ["storage_status"]:
+            if self.state in STORAGE_STATUSSES:
+                return {ATTR_STATUS_DESCRIPTION: STORAGE_STATUSSES[self.state]}
         return None
 
     @property

@@ -305,11 +305,8 @@ DEVICE_STATUSSES = {
 }
 
 STORAGE_STATUSSES = {
-    0: "Unknown",
     1: "Off",
-    2: "Unknown",
     3: "Charging",
     4: "Discharging",
-    5: "Unknown",
     6: "Conservation"
 }
