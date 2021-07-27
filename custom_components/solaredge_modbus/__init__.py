@@ -356,6 +356,7 @@ class SolaredgeModbusHub:
     def read_modbus_data_storage_stub(self):
         self.data["storage_power"] = 1
         self.data["storage_soc"] = 1
+        self.data["storage_status"] = 0
 
         return True
 
@@ -816,6 +817,10 @@ class SolaredgeModbusHub:
         f = struct.pack('>HH', data.getRegister(1), data.getRegister(0))
         return struct.unpack('>f', f)[0]
 
+    def get_int(self, data):
+        i = struct.pack('>HH', data.getRegister(1), data.getRegister(0))
+        return struct.unpack('>I', i)[0]
+
     def read_modbus_data_storage(self):
         if not self.read_storage:
             return True
@@ -833,5 +838,12 @@ class SolaredgeModbusHub:
 
         storage_soc = self.get_float(storage_soc_data)
         self.data["storage_soc"] = round(storage_soc)
+
+        storage_status_data = self.read_holding_registers(unit=1, address=62854, count=2)
+        if storage_status_data.isError():
+            return False
+
+        storage_status = self.get_float(storage_status_data)
+        self.data["storage_status"] = round(storage_status)
 
         return True

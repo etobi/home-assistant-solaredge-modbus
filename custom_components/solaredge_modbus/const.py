@@ -290,6 +290,7 @@ METER3_SENSOR_TYPES = {
 STORAGE_SENSOR_TYPES = {
     "STORAGE_Power": ["Storage AC Power", "storage_power", "W", "mdi:battery-charging-100"],
     "STORAGE_SOC": ["Storage State of Charge", "storage_soc", "%", "mdi:battery-high"],
+    "STORAGE_Status": ["Storage Status", "storage_status", None, None],
 }
 
 DEVICE_STATUSSES = {
@@ -301,4 +302,14 @@ DEVICE_STATUSSES = {
     6: "Shutting down",
     7: "Fault",
     8: "Maintenance/setup",
+}
+
+STORAGE_STATUSSES = {
+    0: "Unknown",
+    1: "Off",
+    2: "Unknown",
+    3: "Charging",
+    4: "Discharging",
+    5: "Unknown",
+    6: "Conservation"
 }
