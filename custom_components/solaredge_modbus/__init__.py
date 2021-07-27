@@ -843,7 +843,6 @@ class SolaredgeModbusHub:
         if storage_status_data.isError():
             return False
 
-        storage_status = self.get_float(storage_status_data)
-        self.data["storage_status"] = round(storage_status)
+        self.data["storage_status"] = self.get_int(storage_status_data)
 
         return True
